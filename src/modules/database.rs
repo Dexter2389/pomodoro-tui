@@ -7,7 +7,9 @@ use serde::{Deserialize, Serialize};
 
 use std::fs;
 
-#[derive(Serialize, Deserialize, Clone)]
+pub const DB_PATH: &str = "./data/db.json";
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TodoDB {
     pub id: usize,
     pub title: String,
@@ -19,7 +21,7 @@ pub struct TodoDB {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Milestone {
     pub subid: usize,
     pub subtitle: String,

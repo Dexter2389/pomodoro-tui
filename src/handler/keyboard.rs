@@ -1,4 +1,6 @@
 use crate::app::{App, AppResult, MenuItems};
+use crate::modules::database::*;
+
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 /// Handles the key events and updates the state of [`App`].

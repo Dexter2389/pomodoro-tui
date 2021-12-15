@@ -93,13 +93,13 @@ impl App {
                     .direction(Direction::Horizontal)
                     .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
                     .split(section[2]);
-                let (list, table) = render_todo(&Todo::default().todo_list_selected);
+                
                 frame.render_stateful_widget(
-                    list,
+                    render_todo_list(),
                     todo_section[0],
                     &mut Todo::default().todo_list_selected,
                 );
-                frame.render_widget(table, todo_section[1]);
+                frame.render_widget(render_todo_details(&Todo::default().todo_list_selected), todo_section[1]);
             }
             MenuItems::Pomodoro => frame.render_widget(render_pomodoro(), section[2]),
             MenuItems::Analytics => frame.render_widget(render_analytics(), section[2]),

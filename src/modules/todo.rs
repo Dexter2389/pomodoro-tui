@@ -5,8 +5,6 @@ use tui::style::{Color, Modifier, Style};
 use tui::text::{Span, Spans};
 use tui::widgets::{Block, BorderType, Borders, Cell, List, ListItem, ListState, Row, Table};
 
-const DB_PATH: &str = "./data/db.json";
-
 // Todo.
 #[derive(Debug)]
 pub struct Todo {
@@ -33,14 +31,9 @@ impl Todo {
     }
 }
 
-pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
-    let todos = Block::default()
-        .borders(Borders::ALL)
-        .style(Style::default().fg(Color::White))
-        .title("Todo List")
-        .border_type(BorderType::Plain);
-
+pub fn render_todo_list<'a>() -> List<'a> {
     let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
+
     let items: Vec<_> = todo_list
         .iter()
         .map(|todo| {
@@ -51,12 +44,26 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
         })
         .collect();
 
-    let list = List::new(items).block(todos).highlight_style(
-        Style::default()
-            .bg(Color::Yellow)
-            .fg(Color::Black)
-            .add_modifier(Modifier::BOLD),
-    );
+    let list = List::new(items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(Color::White))
+                .title("Todo List")
+                .border_type(BorderType::Plain),
+        )
+        .highlight_style(
+            Style::default()
+                .bg(Color::Yellow)
+                .fg(Color::Black)
+                .add_modifier(Modifier::BOLD),
+        );
+
+    return list;
+}
+
+pub fn render_todo_details<'a>(todo_list_state: &ListState) -> Table<'a> {
+    let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
 
     let selected_todo = todo_list
         .get(
@@ -110,6 +117,5 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
         Constraint::Percentage(45),
         Constraint::Percentage(10),
     ]);
-
-    return (list, todo_details);
+    return todo_details;
 }
