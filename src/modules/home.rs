@@ -1,7 +1,7 @@
 use tui::layout::Alignment;
 use tui::style::{Color, Style};
 use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Paragraph};
+use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
 
 pub fn render_home<'a>() -> Paragraph<'a> {
     let home = Paragraph::new(vec![
@@ -24,7 +24,8 @@ pub fn render_home<'a>() -> Paragraph<'a> {
             .style(Style::default().fg(Color::White))
             .title("Home")
             .border_type(BorderType::Plain),
-    );
+    )
+    .wrap(Wrap { trim: true });
 
     return home;
 }

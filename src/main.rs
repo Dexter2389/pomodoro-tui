@@ -3,7 +3,7 @@ use tui::backend::CrosstermBackend;
 use tui::Terminal;
 use pomodoro_tui::app::{App, AppResult};
 use pomodoro_tui::events::{Event, EventHandler};
-use pomodoro_tui::handler::handle_key_events;
+use pomodoro_tui::handler::{keyboard::handle_key_events, mouse::handle_mouse_events};
 use pomodoro_tui::tui::Tui;
 
 fn main() -> AppResult<()> {
@@ -25,7 +25,7 @@ fn main() -> AppResult<()> {
         match tui.events.next()? {
             Event::Tick => app.tick(),
             Event::Key(key_event) => handle_key_events(key_event, &mut app)?,
-            Event::Mouse(_) => {}
+            Event::Mouse(mouse_event) => handle_mouse_events(mouse_event, &mut app)?,
             Event::Resize(_, _) => {}
         }
     }

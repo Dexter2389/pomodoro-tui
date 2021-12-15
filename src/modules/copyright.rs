@@ -1,6 +1,6 @@
 use tui::layout::Alignment;
 use tui::style::{Color, Style};
-use tui::widgets::{Block, BorderType, Borders, Paragraph};
+use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
 
 pub fn render_copyright<'a>() -> Paragraph<'a> {
     let copyright = Paragraph::new("pomodoro-tui 2021 - all rights reserved")
@@ -12,7 +12,8 @@ pub fn render_copyright<'a>() -> Paragraph<'a> {
                 .style(Style::default().fg(Color::White))
                 .title("Copyright")
                 .border_type(BorderType::Plain),
-        );
+        )
+        .wrap(Wrap { trim: true });
     
     return copyright;
 }

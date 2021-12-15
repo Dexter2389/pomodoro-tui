@@ -24,3 +24,6 @@ pub mod analytics;
 
 /// Settings Module.
 pub mod settings;
+
+/// Database Module.
+pub mod database;

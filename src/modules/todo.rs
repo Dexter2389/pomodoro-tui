@@ -1,15 +1,11 @@
-use crate::app::AppResult;
-// use crate::modules::utils::*;
+use crate::modules::database::*;
 
+use tui::layout::Constraint;
 use tui::style::{Color, Modifier, Style};
-use tui::layout::{Constraint};
 use tui::text::{Span, Spans};
 use tui::widgets::{Block, BorderType, Borders, Cell, List, ListItem, ListState, Row, Table};
 
-use chrono::prelude::*;
-use serde::{Deserialize, Serialize};
-
-use std::fs;
+const DB_PATH: &str = "./data/db.json";
 
 // Todo.
 #[derive(Debug)]
@@ -44,16 +40,23 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
         .title("Todo List")
         .border_type(BorderType::Plain);
 
-    let todo_list = read_db().expect("Can fetch List from DB");
+    let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
     let items: Vec<_> = todo_list
         .iter()
         .map(|todo| {
             ListItem::new(Spans::from(vec![Span::styled(
-                todo.name.clone(),
+                todo.title.clone(),
                 Style::default(),
             )]))
         })
         .collect();
+
+    let list = List::new(items).block(todos).highlight_style(
+        Style::default()
+            .bg(Color::Yellow)
+            .fg(Color::Black)
+            .add_modifier(Modifier::BOLD),
+    );
 
     let selected_todo = todo_list
         .get(
@@ -64,18 +67,11 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
         .expect("Exists")
         .clone();
 
-    let list = List::new(items).block(todos).highlight_style(
-        Style::default()
-            .bg(Color::Yellow)
-            .fg(Color::Black)
-            .add_modifier(Modifier::BOLD),
-    );
-
     let todo_details = Table::new(vec![Row::new(vec![
         Cell::from(Span::raw(selected_todo.id.to_string())),
-        Cell::from(Span::raw(selected_todo.name)),
+        Cell::from(Span::raw(selected_todo.title)),
         Cell::from(Span::raw(selected_todo.category)),
-        Cell::from(Span::raw(selected_todo.age.to_string())),
+        Cell::from(Span::raw(selected_todo.description)),
         Cell::from(Span::raw(selected_todo.created_at.to_string())),
     ])])
     .header(Row::new(vec![
@@ -84,7 +80,7 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
             Style::default().add_modifier(Modifier::BOLD),
         )),
         Cell::from(Span::styled(
-            "Name",
+            "Title",
             Style::default().add_modifier(Modifier::BOLD),
         )),
         Cell::from(Span::styled(
@@ -92,7 +88,7 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
             Style::default().add_modifier(Modifier::BOLD),
         )),
         Cell::from(Span::styled(
-            "Age",
+            "Description",
             Style::default().add_modifier(Modifier::BOLD),
         )),
         Cell::from(Span::styled(
@@ -110,26 +106,10 @@ pub fn render_todo<'a>(todo_list_state: &ListState) -> (List<'a>, Table<'a>) {
     .widths(&[
         Constraint::Percentage(5),
         Constraint::Percentage(20),
-        Constraint::Percentage(20),
-        Constraint::Percentage(5),
-        Constraint::Percentage(20),
+        Constraint::Percentage(10),
+        Constraint::Percentage(45),
+        Constraint::Percentage(10),
     ]);
 
     return (list, todo_details);
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-struct Pet {
-    id: usize,
-    name: String,
-    category: String,
-    age: usize,
-    created_at: DateTime<Utc>,
-}
-
-fn read_db() -> AppResult<Vec<Pet>> {
-    const DB_PATH: &str = "./data/db.json";
-    let db_content = fs::read_to_string(DB_PATH)?;
-    let parsed: Vec<Pet> = serde_json::from_str(&db_content)?;
-    Ok(parsed)
 }
