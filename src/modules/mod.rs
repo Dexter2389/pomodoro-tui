@@ -1,5 +1,5 @@
-/// Tabs Module.
-pub mod tabs;
+/// Menu Module.
+pub mod menu;
 
 /// Home Module.
 pub mod home;
@@ -7,8 +7,8 @@ pub mod home;
 /// Copyright Module.
 pub mod copyright;
 
-/// Miscellaneous Module.
-pub mod misc;
+/// Title Module.
+pub mod title;
 
 /// Todo Module.
 pub mod todo;

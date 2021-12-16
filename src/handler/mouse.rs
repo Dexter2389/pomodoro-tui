@@ -1,4 +1,4 @@
-use crate::app::{App, AppResult, MenuItems};
+use crate::app::{App, AppResult};
 use crossterm::event::{MouseEvent};
 
 /// Handles the mouse events and updates the state of [`App`].

@@ -1,0 +1,8 @@
+VERSION: 0.2.0
+- Made some project restructuring for better understandibility.
+- Created `state management system` for the application. It has three main states: `app_control` (to facilitate global application level control), `block_control` (to facilitate block level control), and `sub_block_control` (to facilitate module level control).
+- Added UP/DOWN navigation.
+- Added `global` (app level) and `local` (sub-block level) navigations.
+- Added state related keybindings.
+- Added `select` a block and `exit` a block functionality.
+- Added sub-block level navigation for `Todo` module.

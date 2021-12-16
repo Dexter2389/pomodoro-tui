@@ -1,4 +1,6 @@
+use crate::app::Block as FBlock;
 use crate::modules::database::*;
+use crate::modules::utils::*;
 
 use tui::layout::Constraint;
 use tui::style::{Color, Modifier, Style};
@@ -29,10 +31,48 @@ impl Todo {
     pub fn new() -> Self {
         Self::default()
     }
+
+    /// Navigate to the next item in the list.
+    pub fn next(&mut self) {
+        if let Some(selected) = self.todo_list_selected.selected() {
+            let total_todo_task = read_from_db(DB_PATH).expect("Can fetch List from DB").len();
+            if selected >= total_todo_task - 1 {
+                self.todo_list_selected.select(Some(0));
+            } else {
+                self.todo_list_selected.select(Some(selected + 1));
+            }
+        }
+    }
+
+    /// Navigate to the previous item in the list.
+    pub fn pervious(&mut self) {
+        if let Some(selected) = self.todo_list_selected.selected() {
+            let total_todo_task = read_from_db(DB_PATH).expect("Can fetch List from DB").len();
+            if selected > 0 {
+                self.todo_list_selected.select(Some(selected - 1));
+            } else {
+                self.todo_list_selected.select(Some(total_todo_task - 1));
+            }
+        }
+    }
 }
 
-pub fn render_todo_list<'a>() -> List<'a> {
+pub fn render_todo_list<'a>(
+    focus_block: &'a FBlock,
+    sub_block_in_control: &'a SubBlock,
+) -> List<'a> {
+    let color = check_focus(focus_block, sub_block_in_control, "todo_list");
     let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
+
+    // Need to find a better way to handle do this variable assignment.
+    let mut selected_style = Style::default();
+    if sub_block_in_control == &SubBlock::TodoList || sub_block_in_control == &SubBlock::TodoDetails
+    {
+        selected_style = Style::default()
+            .bg(Color::Yellow)
+            .fg(Color::Black)
+            .add_modifier(Modifier::BOLD);
+    };
 
     let items: Vec<_> = todo_list
         .iter()
@@ -48,21 +88,21 @@ pub fn render_todo_list<'a>() -> List<'a> {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .style(Style::default().fg(Color::White))
+                .style(Style::default().fg(color))
                 .title("Todo List")
                 .border_type(BorderType::Plain),
         )
-        .highlight_style(
-            Style::default()
-                .bg(Color::Yellow)
-                .fg(Color::Black)
-                .add_modifier(Modifier::BOLD),
-        );
+        .highlight_style(selected_style);
 
     return list;
 }
 
-pub fn render_todo_details<'a>(todo_list_state: &ListState) -> Table<'a> {
+pub fn render_todo_details<'a>(
+    focus_block: &'a FBlock,
+    sub_block_in_control: &'a SubBlock,
+    todo_list_state: &ListState,
+) -> Table<'a> {
+    let color = check_focus(focus_block, sub_block_in_control, "todo_details");
     let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
 
     let selected_todo = todo_list
@@ -106,7 +146,7 @@ pub fn render_todo_details<'a>(todo_list_state: &ListState) -> Table<'a> {
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
+            .style(Style::default().fg(color))
             .title("Detail")
             .border_type(BorderType::Plain),
     )
@@ -118,4 +158,26 @@ pub fn render_todo_details<'a>(todo_list_state: &ListState) -> Table<'a> {
         Constraint::Percentage(10),
     ]);
     return todo_details;
+}
+
+fn check_focus(
+    focus_block: &FBlock,
+    sub_block_in_control: &SubBlock,
+    calling_sub_block: &str,
+) -> Color {
+    if focus_block == &FBlock::AppBlock && sub_block_in_control == &SubBlock::None {
+        return Color::Yellow;
+    } else if focus_block == &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::TodoList
+        && calling_sub_block == "todo_list"
+    {
+        return Color::Yellow;
+    } else if focus_block == &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::TodoDetails
+        && calling_sub_block == "todo_details"
+    {
+        return Color::Yellow;
+    } else {
+        return Color::White;
+    };
 }

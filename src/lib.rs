@@ -12,3 +12,6 @@ pub mod handler;
 
 /// Load various modules.
 pub mod modules;
+
+/// Load utils.
+pub mod utils;

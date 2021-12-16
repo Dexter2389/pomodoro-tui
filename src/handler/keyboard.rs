@@ -1,41 +1,154 @@
-use crate::app::{App, AppResult, MenuItems};
-use crate::modules::database::*;
+use crate::app::{App, AppResult, Block};
+use crate::modules::menu::MenuItems;
+use crate::modules::utils::*;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     match key_event.code {
-        // exit application on ESC
-        KeyCode::Esc => {
-            app.running = false;
-        }
         // exit application on Ctrl-D
         KeyCode::Char('d') | KeyCode::Char('D') => {
             if key_event.modifiers == KeyModifiers::CONTROL {
                 app.running = false;
             }
         }
+        // exit application on ESC if the control is with the app or else give control back to application
+        KeyCode::Esc => match app.control_with_app {
+            // Check if the control is with the app.
+            true => {
+                app.running = false;
+            }
+            false => match app.focus_block.sub_block_in_control {
+                // Check which sub block the control is in and pass the control back to the application or other sub block based on the current state.
+                SubBlock::TodoDetails => {
+                    app.focus_block.sub_block_in_control = SubBlock::TodoList;
+                }
+                _ => {
+                    app.focus_block.control_with_block = false;
+                    app.control_with_app = true;
+                    app.focus_block.sub_block_in_control = SubBlock::None;
+                }
+            },
+        },
         // navigate to `todo` on T
-        KeyCode::Char('t') | KeyCode::Char('T') => {
-            app.active_tab = MenuItems::Todo;
-        }
+        KeyCode::Char('t') | KeyCode::Char('T') => match app.control_with_app {
+            // Check if the control is with the app.
+            true => {
+                app.active_tab = MenuItems::Todo;
+                app.focus_block.focus_block = Block::AppBlock;
+            }
+            _ => {}
+        },
         //navigate to `home` on H
-        KeyCode::Char('h') | KeyCode::Char('H') => {
-            app.active_tab = MenuItems::Home;
-        }
+        KeyCode::Char('h') | KeyCode::Char('H') => match app.control_with_app {
+            // Check if the control is with the app.
+            true => {
+                app.active_tab = MenuItems::Home;
+            }
+            _ => {}
+        },
         //navigate to `pomodoro` on P
-        KeyCode::Char('p') | KeyCode::Char('P') => {
-            app.active_tab = MenuItems::Pomodoro;
-        }
+        KeyCode::Char('p') | KeyCode::Char('P') => match app.control_with_app {
+            // Check if the control is with the app.
+            true => {
+                app.active_tab = MenuItems::Pomodoro;
+            }
+            _ => {}
+        },
         //navigate to `analytics` on A
-        KeyCode::Char('a') | KeyCode::Char('A') => {
-            app.active_tab = MenuItems::Analytics;
-        }
+        KeyCode::Char('a') | KeyCode::Char('A') => match app.control_with_app {
+            // Check if the control is with the app.
+            true => {
+                app.active_tab = MenuItems::Analytics;
+            }
+            _ => {}
+        },
         //navigate to `settings` on S
-        KeyCode::Char('s') | KeyCode::Char('S') => {
-            app.active_tab = MenuItems::Settings;
-        }
+        KeyCode::Char('s') | KeyCode::Char('S') => match app.control_with_app {
+            // Check if the control is with the app.
+            true => {
+                app.active_tab = MenuItems::Settings;
+            }
+            _ => {}
+        },
+        //navigate to down on DOWN
+        KeyCode::Down => match app.focus_block.focus_block {
+            // Check which block is in focus.
+            Block::AppBlock => match app.active_tab {
+                // Check which tab is active.
+                MenuItems::Todo => match app.focus_block.control_with_block {
+                    // Check if the control is with the block.
+                    true => match app.focus_block.sub_block_in_control {
+                        // Check which sub block has the control.
+                        SubBlock::TodoList => {
+                            app.todo_list_position.next();
+                        }
+                        _ => app.next(),
+                    },
+                    _ => app.next(),
+                },
+                _ => app.next(),
+            },
+            _ => app.next(),
+        },
+        //navigate to up on UP
+        KeyCode::Up => match app.focus_block.focus_block {
+            // Check which block is in focus.
+            Block::AppBlock => match app.active_tab {
+                // Check which tab is active.
+                MenuItems::Todo => match app.focus_block.control_with_block {
+                    // Check if the control is with the block.
+                    true => match app.focus_block.sub_block_in_control {
+                        // Check which sub block has the control.
+                        SubBlock::TodoList => {
+                            app.todo_list_position.pervious();
+                        }
+                        _ => app.previous(),
+                    },
+                    _ => app.previous(),
+                },
+                _ => app.previous(),
+            },
+            _ => app.previous(),
+        },
+        // Give control to a specific block
+        KeyCode::Enter => match app.focus_block.focus_block {
+            // Only MenuBlock, AppBlock and CopyrightBlock can request control
+            Block::MenuBlock => match app.control_with_app {
+                true => {
+                    app.focus_block.control_with_block = true;
+                    app.control_with_app = false;
+                }
+                _ => {}
+            },
+            Block::AppBlock => match app.active_tab {
+                // Check if the control is with the App or not
+                MenuItems::Todo => match app.control_with_app {
+                    true => {
+                        app.focus_block.control_with_block = true;
+                        app.control_with_app = false;
+                        app.focus_block.sub_block_in_control = SubBlock::TodoList;
+                    }
+                    false => match app.focus_block.sub_block_in_control {
+                        // Check which sub block the control is in and pass the control according to the current state to other sub blocks.
+                        SubBlock::TodoList => {
+                            app.focus_block.sub_block_in_control = SubBlock::TodoDetails;
+                        }
+                        _ => {}
+                    },
+                },
+                _ => {}
+            },
+            Block::CopyrightBlock => match app.control_with_app {
+                true => {
+                    app.focus_block.control_with_block = true;
+                    app.control_with_app = false;
+                }
+                _ => {}
+            },
+            _ => {}
+        },
         _ => {}
     }
     Ok(())
