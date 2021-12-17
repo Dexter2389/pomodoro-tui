@@ -25,7 +25,6 @@ pub struct TodoDB {
 pub struct Milestone {
     pub subid: usize,
     pub subtitle: String,
-    pub description: String,
     pub eta: usize,
     pub status: String,
     pub created_at: DateTime<Utc>,

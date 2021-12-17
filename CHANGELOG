@@ -1,3 +1,10 @@
+VERSION 0.2.1
+- Changed Milestone structure in DB.
+- Create and implemented sub-sub-blocks of `todo_detail_block` for `Todo` module.
+- Changed the UI of `todo_detail_block`.
+- Added state management for `todo_detail_block`.
+- Created sub-sub-blocks for `todo_list_block` for `Todo` module.
+
 VERSION: 0.2.0
 - Made some project restructuring for better understandibility.
 - Created `state management system` for the application. It has three main states: `app_control` (to facilitate global application level control), `block_control` (to facilitate block level control), and `sub_block_control` (to facilitate module level control).

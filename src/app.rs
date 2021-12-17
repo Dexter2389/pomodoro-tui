@@ -56,15 +56,18 @@ pub struct Focus {
     /// Is the control with Application or with the Block?
     pub control_with_block: bool,
     /// Which sub-block has control?
-    pub sub_block_in_control: SubBlock
+    pub sub_block_in_control: SubBlock,
+    /// Which sub-sub-block has control?
+    pub sub_sub_block_in_control: SubSubBlockControl,
 }
 
 impl Default for Focus {
     fn default() -> Self {
         Self {
-            focus_block: Block::AppBlock,
+            focus_block: Block::MenuBlock,
             control_with_block: false,
             sub_block_in_control: SubBlock::None,
+            sub_sub_block_in_control: SubSubBlockControl::new(),
         }
     }
 }
@@ -144,7 +147,7 @@ impl App {
         let size = frame.size();
         let section = Layout::default()
             .direction(Direction::Vertical)
-            .margin(2)
+            .margin(1)
             .constraints(
                 [
                     Constraint::Length(3),
@@ -158,25 +161,93 @@ impl App {
 
         // Assembling complete UI
         frame.render_widget(render_title(&self.focus_block.focus_block), section[0]);
-        frame.render_widget(render_menu(&self.focus_block.focus_block, self.active_tab), section[1]);
+        frame.render_widget(
+            render_menu(&self.focus_block.focus_block, self.active_tab),
+            section[1],
+        );
         match self.active_tab {
-            MenuItems::Home => frame.render_widget(render_home(&self.focus_block.focus_block), section[2]),
+            MenuItems::Home => {
+                frame.render_widget(render_home(&self.focus_block.focus_block), section[2])
+            }
             MenuItems::Todo => {
-                let todo_section = Layout::default()
-                    .direction(Direction::Horizontal)
-                    .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
-                    .split(section[2]);
+                let sub_section = create_todo_sub_sections(section[2]);
                 frame.render_stateful_widget(
-                    render_todo_list(&self.focus_block.focus_block, &self.focus_block.sub_block_in_control),
-                    todo_section[0],
+                    render_todo_list(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                    ),
+                    sub_section[0],
                     &mut self.todo_list_position.todo_list_selected,
                 );
                 frame.render_widget(
                     render_todo_details(
-                        &self.focus_block.focus_block, &self.focus_block.sub_block_in_control,
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                    ),
+                    sub_section[5],
+                );
+                frame.render_widget(
+                    render_todo_title(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
                         &self.todo_list_position.todo_list_selected,
                     ),
-                    todo_section[1],
+                    sub_section[6],
+                );
+                frame.render_widget(
+                    render_todo_created_at(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                        &self.todo_list_position.todo_list_selected,
+                    ),
+                    sub_section[7],
+                );
+                frame.render_widget(
+                    render_todo_category(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                        &self.todo_list_position.todo_list_selected,
+                    ),
+                    sub_section[8],
+                );
+                frame.render_widget(
+                    render_todo_label(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                        &self.todo_list_position.todo_list_selected,
+                    ),
+                    sub_section[9],
+                );
+                frame.render_widget(
+                    render_todo_progress(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                        &self.todo_list_position.todo_list_selected,
+                    ),
+                    sub_section[10],
+                );
+                frame.render_widget(
+                    render_todo_description(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                        &self.todo_list_position.todo_list_selected,
+                    ),
+                    sub_section[11],
+                );
+                frame.render_widget(
+                    render_todo_milestone(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                        &self.todo_list_position.todo_list_selected,
+                    ),
+                    sub_section[12],
                 );
             }
             MenuItems::Pomodoro => {

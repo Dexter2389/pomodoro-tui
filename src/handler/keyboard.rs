@@ -1,6 +1,7 @@
 use crate::app::{App, AppResult, Block};
-use crate::modules::menu::MenuItems;
+use crate::modules::menu::*;
 use crate::modules::utils::*;
+use crate::modules::todo::*;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
@@ -23,11 +24,13 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 // Check which sub block the control is in and pass the control back to the application or other sub block based on the current state.
                 SubBlock::TodoDetails => {
                     app.focus_block.sub_block_in_control = SubBlock::TodoList;
+                    app.focus_block.sub_sub_block_in_control.focus_block = SubSubBlock::None;
                 }
                 _ => {
                     app.focus_block.control_with_block = false;
                     app.control_with_app = true;
                     app.focus_block.sub_block_in_control = SubBlock::None;
+                    app.focus_block.sub_sub_block_in_control.focus_block = SubSubBlock::None;
                 }
             },
         },
@@ -36,7 +39,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             // Check if the control is with the app.
             true => {
                 app.active_tab = MenuItems::Todo;
-                app.focus_block.focus_block = Block::AppBlock;
+                app.focus_block.focus_block = Block::MenuBlock;
             }
             _ => {}
         },
@@ -112,6 +115,46 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             },
             _ => app.previous(),
         },
+        //navigate to right on RIGHT
+        KeyCode::Right => match app.focus_block.focus_block {
+            // Check which block is in focus.
+            Block::AppBlock => match app.active_tab {
+                // Check which tab is active.
+                MenuItems::Todo => match app.focus_block.control_with_block {
+                    // Check if the control is with the block.
+                    true => match app.focus_block.sub_block_in_control {
+                        // Check which sub block has the control.
+                        SubBlock::TodoDetails => {
+                            todo_detail_subsubblock_next(&mut app.focus_block.sub_sub_block_in_control);
+                        }
+                        _ => {},
+                    },
+                    _ => {},
+                },
+                _ => {},
+            },
+            _ => {},
+        },
+        //navigate to left on LEFT
+        KeyCode::Left => match app.focus_block.focus_block {
+            // Check which block is in focus.
+            Block::AppBlock => match app.active_tab {
+                // Check which tab is active.
+                MenuItems::Todo => match app.focus_block.control_with_block {
+                    // Check if the control is with the block.
+                    true => match app.focus_block.sub_block_in_control {
+                        // Check which sub block has the control.
+                        SubBlock::TodoDetails => {
+                            todo_detail_subsubblock_previous(&mut app.focus_block.sub_sub_block_in_control);
+                        }
+                        _ => {},
+                    },
+                    _ => {},
+                },
+                _ => {},
+            },
+            _ => {},
+        },
         // Give control to a specific block
         KeyCode::Enter => match app.focus_block.focus_block {
             // Only MenuBlock, AppBlock and CopyrightBlock can request control
@@ -134,6 +177,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                         // Check which sub block the control is in and pass the control according to the current state to other sub blocks.
                         SubBlock::TodoList => {
                             app.focus_block.sub_block_in_control = SubBlock::TodoDetails;
+                            app.focus_block.sub_sub_block_in_control.focus_block = SubSubBlock::TodoTitle;
                         }
                         _ => {}
                     },
