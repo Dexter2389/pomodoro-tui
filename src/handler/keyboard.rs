@@ -24,7 +24,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 // Check which sub block the control is in and pass the control back to the application or other sub block based on the current state.
                 SubBlock::TodoDetails => {
                     app.focus_block.sub_block_in_control = SubBlock::TodoList;
-                    app.focus_block.sub_sub_block_in_control.focus_block = SubSubBlock::None;
+                    app.focus_block.sub_sub_block_in_control.focus_block = SubSubBlock::TodoListArea;
                 }
                 _ => {
                     app.focus_block.control_with_block = false;
@@ -125,7 +125,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                     true => match app.focus_block.sub_block_in_control {
                         // Check which sub block has the control.
                         SubBlock::TodoDetails => {
-                            todo_detail_subsubblock_next(&mut app.focus_block.sub_sub_block_in_control);
+                            todo_detail_subsubblock_next(&mut app.focus_block.sub_sub_block_in_control, 4, 11);
                         }
                         _ => {},
                     },
@@ -145,7 +145,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                     true => match app.focus_block.sub_block_in_control {
                         // Check which sub block has the control.
                         SubBlock::TodoDetails => {
-                            todo_detail_subsubblock_previous(&mut app.focus_block.sub_sub_block_in_control);
+                            todo_detail_subsubblock_previous(&mut app.focus_block.sub_sub_block_in_control, 4, 11);
                         }
                         _ => {},
                     },

@@ -62,40 +62,13 @@ impl Todo {
 pub fn render_todo_list<'a>(
     focus_block: &'a FBlock,
     sub_block_in_control: &'a SubBlock,
-) -> List<'a> {
+) -> Block<'a> {
     let color = check_focus_subblock(focus_block, sub_block_in_control, "list");
-    let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
-
-    // Need to find a better way to handle do this variable assignment.
-    let mut selected_style = Style::default();
-    if sub_block_in_control == &SubBlock::TodoList || sub_block_in_control == &SubBlock::TodoDetails
-    {
-        selected_style = Style::default()
-            .bg(Color::Yellow)
-            .fg(Color::Black)
-            .add_modifier(Modifier::BOLD);
-    };
-
-    let items: Vec<_> = todo_list
-        .iter()
-        .map(|todo| {
-            ListItem::new(Spans::from(vec![Span::styled(
-                todo.title.clone(),
-                Style::default(),
-            )]))
-        })
-        .collect();
-
-    let list = List::new(items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .style(Style::default().fg(color))
-                .title("Todo List")
-                .border_type(BorderType::Plain),
-        )
-        .highlight_style(selected_style);
-
+    let list = Block::default()
+        .borders(Borders::ALL)
+        .style(Style::default().fg(color))
+        .title("Todo List")
+        .border_type(BorderType::Plain);
     return list;
 }
 
@@ -119,17 +92,17 @@ pub fn create_todo_sub_sections(area: Rect) -> Vec<Rect> {
         .split(area);
 
     let sub_section_1 = Layout::default()
-    .direction(Direction::Vertical)
-    .margin(1)
-    .constraints(
-        [
-            Constraint::Length(3),
-            Constraint::Min(3),
-            Constraint::Length(5),
-        ]
-        .as_ref(),
-    )
-    .split(main_section[0]);
+        .direction(Direction::Vertical)
+        .margin(1)
+        .constraints(
+            [
+                Constraint::Length(3),
+                Constraint::Min(3),
+                Constraint::Length(5),
+            ]
+            .as_ref(),
+        )
+        .split(main_section[0]);
 
     let first_sub_sub_section_1 = Layout::default()
         .direction(Direction::Horizontal)
@@ -198,13 +171,126 @@ pub fn create_todo_sub_sections(area: Rect) -> Vec<Rect> {
     ];
 }
 
+pub fn render_todo_search<'a>(
+    focus_block: &'a FBlock,
+    sub_block_in_control: &'a SubBlock,
+    sub_sub_block_in_control: &'a SubSubBlock,
+) -> Block<'a> {
+    let color = check_focus_list_subsubblock(
+        focus_block,
+        sub_block_in_control,
+        sub_sub_block_in_control,
+        "search",
+    );
+    let search = Block::default()
+        .borders(Borders::ALL)
+        .style(Style::default().fg(color))
+        .title("Search Task")
+        .border_type(BorderType::Plain);
+    return search;
+}
+
+pub fn render_todo_list_area<'a>(
+    focus_block: &'a FBlock,
+    sub_block_in_control: &'a SubBlock,
+    sub_sub_block_in_control: &'a SubSubBlock,
+) -> List<'a> {
+    let color = check_focus_list_subsubblock(
+        focus_block,
+        sub_block_in_control,
+        sub_sub_block_in_control,
+        "list_area",
+    );
+    let todo_list = read_from_db(DB_PATH).expect("Can fetch List from DB");
+
+    // Need to find a better way to handle do this variable assignment.
+    let mut selected_style = Style::default();
+    if sub_block_in_control == &SubBlock::TodoList || sub_block_in_control == &SubBlock::TodoDetails
+    {
+        selected_style = Style::default()
+            .bg(Color::Yellow)
+            .fg(Color::Black)
+            .add_modifier(Modifier::BOLD);
+    };
+
+    let items: Vec<_> = todo_list
+        .iter()
+        .map(|todo| {
+            ListItem::new(Spans::from(vec![Span::styled(
+                todo.title.clone(),
+                Style::default(),
+            )]))
+        })
+        .collect();
+
+    let list = List::new(items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(color))
+                .title("Todo List")
+                .border_type(BorderType::Plain),
+        )
+        .highlight_style(selected_style);
+
+    return list;
+}
+
+pub fn render_todo_add_task<'a>(
+    focus_block: &'a FBlock,
+    sub_block_in_control: &'a SubBlock,
+    sub_sub_block_in_control: &'a SubSubBlock,
+) -> Paragraph<'a> {
+    let color = check_focus_list_subsubblock(
+        focus_block,
+        sub_block_in_control,
+        sub_sub_block_in_control,
+        "add",
+    );
+    let add = Paragraph::new("Add Task")
+        .style(Style::default())
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(color))
+                .border_type(BorderType::Plain),
+        )
+        .wrap(Wrap { trim: true });
+    return add;
+}
+
+pub fn render_todo_remove_task<'a>(
+    focus_block: &'a FBlock,
+    sub_block_in_control: &'a SubBlock,
+    sub_sub_block_in_control: &'a SubSubBlock,
+) -> Paragraph<'a> {
+    let color = check_focus_list_subsubblock(
+        focus_block,
+        sub_block_in_control,
+        sub_sub_block_in_control,
+        "remove",
+    );
+    let remove = Paragraph::new("Remove Task")
+        .style(Style::default())
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(color))
+                .border_type(BorderType::Plain),
+        )
+        .wrap(Wrap { trim: true });
+    return remove;
+}
+
 pub fn render_todo_title<'a>(
     focus_block: &'a FBlock,
     sub_block_in_control: &'a SubBlock,
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Paragraph<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -231,7 +317,7 @@ pub fn render_todo_created_at<'a>(
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Paragraph<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -258,7 +344,7 @@ pub fn render_todo_category<'a>(
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Paragraph<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -285,7 +371,7 @@ pub fn render_todo_label<'a>(
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Paragraph<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -312,7 +398,7 @@ pub fn render_todo_progress<'a>(
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Paragraph<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -339,7 +425,7 @@ pub fn render_todo_description<'a>(
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Paragraph<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -366,7 +452,7 @@ pub fn render_todo_milestone<'a>(
     sub_sub_block_in_control: &'a SubSubBlock,
     todo_list_state: &ListState,
 ) -> Table<'a> {
-    let color = check_focus_subsubblock(
+    let color = check_focus_detail_subsubblock(
         focus_block,
         sub_block_in_control,
         sub_sub_block_in_control,
@@ -448,29 +534,35 @@ fn get_selected_item(todo_list_state: &ListState) -> TodoDB {
     return selected_todo;
 }
 
-pub fn todo_detail_subsubblock_next(current_focus_subsubblock: &mut SubSubBlockControl) {
+pub fn todo_detail_subsubblock_next(
+    current_focus_subsubblock: &mut SubSubBlockControl,
+    lower_limit: usize,
+    higher_limit: usize,
+) {
     let current_focus: usize = SubSubBlock::from(current_focus_subsubblock.focus_block);
-    let total_focus_blocks = 7;
 
-    if current_focus >= total_focus_blocks {
-        current_focus_subsubblock.focus_block = SubSubBlock::from_usize(1);
+    if current_focus >= higher_limit || current_focus < lower_limit {
+        current_focus_subsubblock.focus_block = SubSubBlock::from_usize(5);
     } else {
         current_focus_subsubblock.focus_block = SubSubBlock::from_usize(current_focus + 1);
     }
 }
 
-pub fn todo_detail_subsubblock_previous(current_focus_subsubblock: &mut SubSubBlockControl) {
+pub fn todo_detail_subsubblock_previous(
+    current_focus_subsubblock: &mut SubSubBlockControl,
+    lower_limit: usize,
+    higher_limit: usize,
+) {
     let current_focus: usize = SubSubBlock::from(current_focus_subsubblock.focus_block);
-    let total_focus_blocks = 7;
 
-    if current_focus > 1 && current_focus <= total_focus_blocks {
+    if current_focus > lower_limit + 1 && current_focus <= higher_limit {
         current_focus_subsubblock.focus_block = SubSubBlock::from_usize(current_focus - 1);
     } else {
-        current_focus_subsubblock.focus_block = SubSubBlock::from_usize(total_focus_blocks);
+        current_focus_subsubblock.focus_block = SubSubBlock::from_usize(higher_limit);
     }
 }
 
-fn check_focus_subsubblock(
+fn check_focus_list_subsubblock(
     focus_block: &FBlock,
     sub_block_in_control: &SubBlock,
     sub_sub_block_in_control: &SubSubBlock,
@@ -486,10 +578,54 @@ fn check_focus_subsubblock(
         && sub_sub_block_in_control == &SubSubBlock::None
     {
         return Color::White;
+    } else if focus_block == &FBlock::AppBlock && sub_block_in_control == &SubBlock::TodoDetails {
+        return Color::White;
     } else if focus_block == &FBlock::AppBlock
         && sub_block_in_control == &SubBlock::TodoList
+        && sub_sub_block_in_control == &SubSubBlock::TodoSearch
+        && calling_sub_block == "search"
+    {
+        return Color::White;
+    } else if focus_block == &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::TodoList
+        && sub_sub_block_in_control == &SubSubBlock::TodoListArea
+        && calling_sub_block == "list_area"
+    {
+        return Color::White;
+    } else if focus_block == &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::TodoList
+        && sub_sub_block_in_control == &SubSubBlock::TodoAddTask
+        && calling_sub_block == "add"
+    {
+        return Color::White;
+    } else if focus_block == &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::TodoList
+        && sub_sub_block_in_control == &SubSubBlock::TodoDeleteTask
+        && calling_sub_block == "delete"
+    {
+        return Color::White;
+    } else {
+        return Color::Yellow;
+    }
+}
+
+fn check_focus_detail_subsubblock(
+    focus_block: &FBlock,
+    sub_block_in_control: &SubBlock,
+    sub_sub_block_in_control: &SubSubBlock,
+    calling_sub_block: &str,
+) -> Color {
+    if focus_block == &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::None
         && sub_sub_block_in_control == &SubSubBlock::None
     {
+        return Color::Yellow;
+    } else if focus_block != &FBlock::AppBlock
+        && sub_block_in_control == &SubBlock::None
+        && sub_sub_block_in_control == &SubSubBlock::None
+    {
+        return Color::White;
+    } else if focus_block == &FBlock::AppBlock && sub_block_in_control == &SubBlock::TodoList {
         return Color::White;
     } else if focus_block == &FBlock::AppBlock
         && sub_block_in_control == &SubBlock::TodoDetails

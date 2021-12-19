@@ -171,13 +171,45 @@ impl App {
             }
             MenuItems::Todo => {
                 let sub_section = create_todo_sub_sections(section[2]);
-                frame.render_stateful_widget(
+                frame.render_widget(
                     render_todo_list(
                         &self.focus_block.focus_block,
                         &self.focus_block.sub_block_in_control,
                     ),
                     sub_section[0],
+                );
+                frame.render_widget(
+                    render_todo_search(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                    ),
+                    sub_section[1],
+                );
+                frame.render_stateful_widget(
+                    render_todo_list_area(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                    ),
+                    sub_section[2],
                     &mut self.todo_list_position.todo_list_selected,
+                );
+                frame.render_widget(
+                    render_todo_add_task(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                    ),
+                    sub_section[3],
+                );
+                frame.render_widget(
+                    render_todo_remove_task(
+                        &self.focus_block.focus_block,
+                        &self.focus_block.sub_block_in_control,
+                        &self.focus_block.sub_sub_block_in_control.focus_block,
+                    ),
+                    sub_section[4],
                 );
                 frame.render_widget(
                     render_todo_details(
